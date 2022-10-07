@@ -20,4 +20,8 @@ if response.ok:
         link = a["href"]
         links.append(f"{url}{link}")
 
-print(links[1])
+    url = links[1]
+
+# function pour get les data du site
+
+print(len(links))
