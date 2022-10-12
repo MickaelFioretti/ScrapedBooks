@@ -1,7 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
-links = []
+linksCategory = []
+linksBook = []
 
 url = "http://books.toscrape.com/"
 response = requests.get(url)
@@ -18,10 +19,33 @@ if response.ok:
     for li in lis:
         a = li.find("a")
         link = a["href"]
-        links.append(f"{url}{link}")
+        linksCategory.append(f"{url}{link}")
 
-    url = links[1]
+url = linksCategory[1]
+response = requests.get(url)
+
+if response.ok:
+    soup = BeautifulSoup(response.text, "lxml")
+    ol = soup.find("ol")
+    lis = ol.findAll("li")
+
+    for li in lis:
+        a = li.find("a")
+        link = a["href"]
+        linksBook.append(f"{link}")
+
+
+url = f"http://books.toscrape.com/catalogue/{linksBook[0][9:]}"
+response = requests.get(url)
+
+if response.ok:
+    soup = BeautifulSoup(response.text, "lxml")
+    article = soup.find("article", {"class": "product_page"})
+    h1 = article.find("h1")
+    p = article.find("p", {"class": ""})
+    allInfo = f"page_url : {url} \ntitle : {str(h1)[4:-5]} \nprice : \ndescription : {str(p)[3:-4]}"
 
 # function pour get les data du site
-
-print(len(links))
+# print(len(linksCategory))
+# print(linksBook[0][9:])
+print(allInfo)
