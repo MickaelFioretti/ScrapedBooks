@@ -1,8 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
+import csv
 
 linksCategory = []
 linksBook = []
+sample_csv = "./sample.csv"
+
 
 url = "http://books.toscrape.com/"
 response = requests.get(url)
@@ -41,11 +44,62 @@ response = requests.get(url)
 if response.ok:
     soup = BeautifulSoup(response.text, "lxml")
     article = soup.find("article", {"class": "product_page"})
-    h1 = article.find("h1")
-    p = article.find("p", {"class": ""})
-    allInfo = f"page_url : {url} \ntitle : {str(h1)[4:-5]} \nprice : \ndescription : {str(p)[3:-4]}"
+    ul = soup.find("ul", {"class": "breadcrumb"})
+    table = article.find("table", {"class": "table table-striped"})
+    td = table.findAll("td")
+    review_rating = (
+        soup.find("div", {"class": "col-sm-6 product_main"})
+        .find("p", {"class": "star-rating"})
+        .attrs["class"][1]
+    )
+
+    universal_product_code = str(td[0])[4:-5]
+    title = article.find("h1").contents
+    price_including_tax = str(td[3])[4:-5]
+    price_excluding_tax = str(td[2])[4:-5]
+    number_available = str(td[5])[4:-5]
+    product_description = article.find("p", {"class": ""}).contents
+    category = ul.findAll("li")[2].find("a").contents[0]
+    image_url = soup.find("div", {"class": "item active"}).find("img").attrs["src"][6:]
 
 # function pour get les data du site
 # print(len(linksCategory))
 # print(linksBook[0][9:])
-print(allInfo)
+
+
+header = [
+    "product_page_url",
+    "universal_product_code",
+    "title",
+    "price_including_tax",
+    "price_excluding_tax",
+    "number_available",
+    "product_description",
+    "category",
+    "review_rating",
+    "image_url",
+]
+
+
+with open(sample_csv, "w", newline="") as csv_file:
+    writer = csv.writer(csv_file, delimiter=",")
+    writer.writerow(header)
+    writer.writerow(
+        [
+            url,
+            universal_product_code,
+            title,
+            price_including_tax,
+            price_excluding_tax,
+            number_available,
+            product_description,
+            category,
+            review_rating,
+            image_url,
+        ]
+    )
+
+with open(sample_csv, "r") as csv_file:
+    csv_reader = csv.reader(csv_file)
+    for line in csv_reader:
+        print(line)
