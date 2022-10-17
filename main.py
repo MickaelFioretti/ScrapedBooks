@@ -2,6 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
+# function
+from .function.GetBook import GetBooks
+
 linksCategory = []
 linksBook = []
 sample_csv = "./sample.csv"
@@ -40,6 +43,8 @@ if response.ok:
 
 url = f"http://books.toscrape.com/catalogue/{linksBook[0][9:]}"
 response = requests.get(url)
+
+GetBooks(url)
 
 if response.ok:
     soup = BeautifulSoup(response.text, "lxml")
@@ -99,7 +104,7 @@ with open(sample_csv, "w", newline="") as csv_file:
         ]
     )
 
-with open(sample_csv, "r") as csv_file:
-    csv_reader = csv.reader(csv_file)
-    for line in csv_reader:
-        print(line)
+# with open(sample_csv, "r") as csv_file:
+#     csv_reader = csv.reader(csv_file)
+#     for line in csv_reader:
+#         print(line)
