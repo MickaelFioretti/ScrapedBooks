@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 
 # function
-from .function.GetBook import GetBooks
+from function.GetBook import GetBooks
 
 linksCategory = []
 linksBook = []
