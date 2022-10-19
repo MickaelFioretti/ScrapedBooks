@@ -27,6 +27,8 @@ if response.ok:
         link = a["href"]
         linksCategory.append(f"{url}{link}")
 
+print("Links category ok !")
+
 url = linksCategory[1]
 response = requests.get(url)
 
@@ -40,6 +42,7 @@ if response.ok:
         link = a["href"]
         linksBook.append(f"{link}")
 
+print("Links book ok !")
 
 # Pour chaque url dans linksBook execute GetBooks et rajoute les data dans un fichier csv
 with open(sample_csv, "w", newline="") as csvfile:
@@ -57,7 +60,7 @@ with open(sample_csv, "w", newline="") as csvfile:
     ]
     writer = csv.writer(csvfile, delimiter=",")
     writer.writerow(fieldnames)
-
+    print("CSV file inprogress ...")
     for link in linksBook:
         url = f"http://books.toscrape.com/catalogue/{link[9:]}"
         book = GetBooks(url)
@@ -75,3 +78,5 @@ with open(sample_csv, "w", newline="") as csvfile:
                 book["image_url"],
             ]
         )
+
+print("CSV file ok !")
