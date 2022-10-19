@@ -45,7 +45,7 @@ if response.ok:
 print("Links book ok !")
 
 # Pour chaque url dans linksBook execute GetBooks et rajoute les data dans un fichier csv
-with open(sample_csv, "w", newline="") as csvfile:
+with open(sample_csv, "w", newline="", encoding="utf-8") as csvfile:
     fieldnames = [
         "product_page_url",
         "universal_product_code",
