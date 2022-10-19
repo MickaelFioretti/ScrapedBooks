@@ -29,18 +29,30 @@ if response.ok:
 
 print("Links category ok !")
 
-url = linksCategory[1]
+url = linksCategory[4]
+categoryLink = url[:-10]
 response = requests.get(url)
 
-if response.ok:
-    soup = BeautifulSoup(response.text, "lxml")
-    ol = soup.find("ol")
-    lis = ol.findAll("li")
 
-    for li in lis:
-        a = li.find("a")
+# Get all books in the category and check if next page is available if yes, get all books in the next page and do it until the next page is not available
+while response.ok:
+    soup = BeautifulSoup(response.text, "lxml")
+    ol = soup.find("ol", {"class": "row"})
+    h3s = ol.findAll("h3")
+
+    for h3 in h3s:
+        a = h3.find("a")
         link = a["href"]
         linksBook.append(f"{link}")
+
+    next = soup.find("li", {"class": "next"})
+    if next:
+        a = next.find("a")
+        link = a["href"]
+        url = f"{categoryLink}{link}"
+        response = requests.get(url)
+    else:
+        break
 
 print("Links book ok !")
 
