@@ -2,6 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 
+# function
+from function.GetBook import GetBooks
+
 linksCategory = []
 linksBook = []
 sample_csv = "./sample.csv"
@@ -24,82 +27,68 @@ if response.ok:
         link = a["href"]
         linksCategory.append(f"{url}{link}")
 
-url = linksCategory[1]
+print("Links category ok !")
+
+url = linksCategory[4]
+categoryLink = url[:-10]
 response = requests.get(url)
 
-if response.ok:
-    soup = BeautifulSoup(response.text, "lxml")
-    ol = soup.find("ol")
-    lis = ol.findAll("li")
 
-    for li in lis:
-        a = li.find("a")
+# Get all books in the category and check if next page is available if yes, get all books in the next page and do it until the next page is not available
+while response.ok:
+    soup = BeautifulSoup(response.text, "lxml")
+    ol = soup.find("ol", {"class": "row"})
+    h3s = ol.findAll("h3")
+
+    for h3 in h3s:
+        a = h3.find("a")
         link = a["href"]
         linksBook.append(f"{link}")
 
+    next = soup.find("li", {"class": "next"})
+    if next:
+        a = next.find("a")
+        link = a["href"]
+        url = f"{categoryLink}{link}"
+        response = requests.get(url)
+    else:
+        break
 
-url = f"http://books.toscrape.com/catalogue/{linksBook[0][9:]}"
-response = requests.get(url)
+print("Links book ok !")
 
-if response.ok:
-    soup = BeautifulSoup(response.text, "lxml")
-    article = soup.find("article", {"class": "product_page"})
-    ul = soup.find("ul", {"class": "breadcrumb"})
-    table = article.find("table", {"class": "table table-striped"})
-    td = table.findAll("td")
-    review_rating = (
-        soup.find("div", {"class": "col-sm-6 product_main"})
-        .find("p", {"class": "star-rating"})
-        .attrs["class"][1]
-    )
+# Pour chaque url dans linksBook execute GetBooks et rajoute les data dans un fichier csv
+with open(sample_csv, "w", newline="", encoding="utf-8") as csvfile:
+    fieldnames = [
+        "product_page_url",
+        "universal_product_code",
+        "title",
+        "price_including_tax",
+        "price_excluding_tax",
+        "number_available",
+        "product_description",
+        "category",
+        "review_rating",
+        "image_url",
+    ]
+    writer = csv.writer(csvfile, delimiter=",")
+    writer.writerow(fieldnames)
+    print("CSV file inprogress ...")
+    for link in linksBook:
+        url = f"http://books.toscrape.com/catalogue/{link[9:]}"
+        book = GetBooks(url)
+        writer.writerow(
+            [
+                book["product_page_url"],
+                book["universal_product_code"],
+                book["title"],
+                book["price_including_tax"],
+                book["price_excluding_tax"],
+                book["number_available"],
+                book["product_description"],
+                book["category"],
+                book["review_rating"],
+                book["image_url"],
+            ]
+        )
 
-    universal_product_code = str(td[0])[4:-5]
-    title = article.find("h1").contents
-    price_including_tax = str(td[3])[4:-5]
-    price_excluding_tax = str(td[2])[4:-5]
-    number_available = str(td[5])[4:-5]
-    product_description = article.find("p", {"class": ""}).contents
-    category = ul.findAll("li")[2].find("a").contents[0]
-    image_url = soup.find("div", {"class": "item active"}).find("img").attrs["src"][6:]
-
-# function pour get les data du site
-# print(len(linksCategory))
-# print(linksBook[0][9:])
-
-
-header = [
-    "product_page_url",
-    "universal_product_code",
-    "title",
-    "price_including_tax",
-    "price_excluding_tax",
-    "number_available",
-    "product_description",
-    "category",
-    "review_rating",
-    "image_url",
-]
-
-
-with open(sample_csv, "w", newline="") as csv_file:
-    writer = csv.writer(csv_file, delimiter=",")
-    writer.writerow(header)
-    writer.writerow(
-        [
-            url,
-            universal_product_code,
-            title,
-            price_including_tax,
-            price_excluding_tax,
-            number_available,
-            product_description,
-            category,
-            review_rating,
-            image_url,
-        ]
-    )
-
-with open(sample_csv, "r") as csv_file:
-    csv_reader = csv.reader(csv_file)
-    for line in csv_reader:
-        print(line)
+print("CSV file ok !")
