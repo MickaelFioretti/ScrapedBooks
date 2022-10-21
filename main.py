@@ -50,6 +50,10 @@ with open(sample_csv, "w", newline="", encoding="utf-8") as csvfile:
     writer = csv.writer(csvfile, delimiter=",")
     writer.writerow(fieldnames)
 
+print("Header ok !")
+
+print("Start scraping...")
+
 # for each link in linksCategory get all links of books
 for url in linksCategory:
     response = requests.get(url)
@@ -73,3 +77,5 @@ for url in linksCategory:
             response = requests.get(url)
         else:
             break
+
+print("End")
