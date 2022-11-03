@@ -1,18 +1,18 @@
+import csv
 import requests
 from bs4 import BeautifulSoup
-import csv
 
 # function
 from function.CsvEditor import CsvEditor
 
-linksCategory = []
-linksBook = []
-sample_csv = "./sample.csv"
+links_category = []
+links_book = []
+SAPLE_CSV = "./sample.csv"
 
 print("Start")
 
-url = "http://books.toscrape.com/"
-response = requests.get(url)
+URL = "http://books.toscrape.com/"
+response = requests.get(URL)
 
 if response.ok:
     # Get all information of html page
@@ -26,15 +26,15 @@ if response.ok:
     for li in lis:
         a = li.find("a")
         link = a["href"]
-        linksCategory.append(f"{url}{link}")
+        links_category.append(f"{URL}{link}")
 
 print("Links category ok !")
 
 # Remove the first link because it's not a category
-linksCategory.pop(0)
+links_category.pop(0)
 
 # Write the header of csv file
-with open(sample_csv, "w", newline="", encoding="utf-8") as csvfile:
+with open(SAPLE_CSV, "w", newline="", encoding="utf-8") as csvfile:
     fieldnames = [
         "product_page_url",
         "universal_product_code",
@@ -55,9 +55,9 @@ print("Header ok !")
 print("Start scraping...")
 
 # for each link in linksCategory get all links of books
-for url in linksCategory:
-    response = requests.get(url)
-    categoryLink = url[:-10]
+for URL in links_category:
+    response = requests.get(URL)
+    category_link = URL[:-10]
     # Get all books in the category and check if next page is available if yes => loop
     while response.ok:
         soup = BeautifulSoup(response.text, "lxml")
@@ -73,8 +73,8 @@ for url in linksCategory:
         if next:
             a = next.find("a")
             link = a["href"]
-            url = f"{categoryLink}{link}"
-            response = requests.get(url)
+            URL = f"{category_link}{link}"
+            response = requests.get(URL)
         else:
             break
 
